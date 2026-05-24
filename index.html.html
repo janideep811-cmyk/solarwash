@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SolarWash Pro — Visit Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --sun: #F5A623;
+    --sun-deep: #E8860A;
+    --sky: #0A1628;
+    --sky-mid: #0E2040;
+    --sky-card: #132850;
+    --sky-border: #1E3A6A;
+    --panel: #1B4F8A;
+    --clean: #00D4AA;
+    --clean-dim: #00A882;
+    --text: #EEF4FF;
+    --muted: #7A9CC4;
+    --danger: #FF5B5B;
+    --radius: 14px;
+    --step-count: 4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--sky);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 100px;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(245,166,35,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 90% 100%, rgba(0,212,170,0.06) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--sky-mid), var(--sky));
+    border-bottom: 1px solid var(--sky-border);
+    padding: 14px 20px 10px;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .header-top { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--sun), var(--sun-deep));
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    box-shadow: 0 0 16px rgba(245,166,35,0.4);
+  }
+  .header-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 20px; color: var(--text); }
+  .header-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { margin-top: 14px; }
+  .steps-row { display: flex; gap: 6px; }
+  .step-pill {
+    flex: 1; height: 4px; border-radius: 10px;
+    background: var(--sky-border);
+    transition: background 0.4s;
+  }
+  .step-pill.done { background: var(--sun); }
+  .step-pill.active { background: linear-gradient(90deg, var(--sun), var(--clean)); }
+  .step-label { margin-top: 6px; font-size: 11px; color: var(--muted); }
+  .step-label span { color: var(--sun); font-weight: 600; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--sky-card);
+    border: 1px solid var(--sky-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px;
+    display: none;
+    animation: slideUp 0.35s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .card.active { display: block; }
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .section-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .icon-orange { background: rgba(245,166,35,0.15); }
+  .icon-blue   { background: rgba(27,79,138,0.4); }
+  .icon-green  { background: rgba(0,212,170,0.12); }
+  .icon-purple { background: rgba(150,100,255,0.15); }
+  .section-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+  .section-num { font-size: 11px; color: var(--muted); }
+
+  /* ── FORM FIELDS ── */
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.4px; margin-bottom: 6px; text-transform: uppercase; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--sky-mid);
+    border: 1.5px solid var(--sky-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 11px 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--sun);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.15);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: var(--sky-mid); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── GPS BUTTON ── */
+  .gps-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,212,170,0.12);
+    border: 1.5px solid var(--clean-dim);
+    border-radius: 10px;
+    color: var(--clean);
+    font-size: 14px; font-weight: 500;
+    padding: 10px 14px;
+    cursor: pointer; width: 100%;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .gps-btn:hover { background: rgba(0,212,170,0.2); }
+  .gps-status { font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 18px; }
+
+  /* ── PAYMENT ── */
+  .pay-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .pay-opt {
+    border: 2px solid var(--sky-border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 13px; font-weight: 500;
+  }
+  .pay-opt .pay-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+  .pay-opt.selected { border-color: var(--sun); background: rgba(245,166,35,0.08); }
+  .pay-opt:hover { border-color: var(--sun-deep); }
+
+  .qr-box {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px;
+    display: none;
+  }
+  .qr-box.show { display: flex; }
+  .qr-box img { width: 140px; height: 140px; border-radius: 8px; }
+  .qr-label { color: #333; font-size: 12px; font-weight: 600; text-align: center; }
+  .qr-upload-btn {
+    background: var(--sky-mid);
+    border: 1.5px dashed var(--sky-border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* ── PHOTO UPLOAD ── */
+  .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .photo-slot {
+    border: 2px dashed var(--sky-border);
+    border-radius: 12px;
+    min-height: 130px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; cursor: pointer;
+    overflow: hidden; position: relative;
+    transition: border-color 0.2s;
+    background: var(--sky-mid);
+  }
+  .photo-slot:hover { border-color: var(--sun); }
+  .photo-slot .ph-icon { font-size: 28px; }
+  .photo-slot .ph-label { font-size: 12px; color: var(--muted); text-align: center; padding: 0 8px; }
+  .photo-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; border-radius: 10px; }
+  .photo-slot input[type=file] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+  .photo-badge {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px;
+    background: rgba(0,0,0,0.55); color: white;
+  }
+  .before-badge { background: rgba(255,91,91,0.85); }
+  .after-badge  { background: rgba(0,212,170,0.85); }
+
+  /* ── SIGNATURE ── */
+  .sig-wrap { position: relative; }
+  canvas#sigCanvas {
+    width: 100%; height: 160px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid var(--sky-border);
+    display: block;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .sig-clear {
+    position: absolute; top: 8px; right: 10px;
+    background: rgba(255,91,91,0.15);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 8px;
+    font-size: 12px; padding: 4px 10px;
+    cursor: pointer;
+  }
+  .sig-hint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  /* ── REMARKS ── */
+  .star-row { display: flex; gap: 6px; margin: 6px 0 14px; }
+  .star { font-size: 26px; cursor: pointer; color: var(--sky-border); transition: color 0.1s; }
+  .star.lit { color: var(--sun); }
+
+  /* ── AMOUNT DISPLAY ── */
+  .amount-display {
+    background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(0,212,170,0.06));
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .amount-lbl { font-size: 12px; color: var(--muted); }
+  .amount-val { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: var(--sun); }
+
+  /* ── NAV BUTTONS ── */
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--sky-mid);
+    border-top: 1px solid var(--sky-border);
+    padding: 12px 16px;
+    display: flex; gap: 10px;
+    z-index: 100;
+  }
+  .btn {
+    flex: 1; padding: 14px;
+    border-radius: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.5px;
+    border: none; cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-back {
+    background: var(--sky-card);
+    border: 1.5px solid var(--sky-border);
+    color: var(--muted);
+  }
+  .btn-next {
+    background: linear-gradient(135deg, var(--sun), var(--sun-deep));
+    color: var(--sky);
+    box-shadow: 0 4px 20px rgba(245,166,35,0.35);
+  }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--clean), var(--clean-dim));
+    color: var(--sky);
+    box-shadow: 0 4px 20px rgba(0,212,170,0.35);
+  }
+
+  /* ── SUCCESS ── */
+  #successCard {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #successCard.show { display: block; }
+  .success-icon { font-size: 64px; margin-bottom: 16px; }
+  .success-title { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: var(--clean); margin-bottom: 8px; }
+  .success-sub { color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .success-ref { font-family: 'Rajdhani', sans-serif; color: var(--sun); font-size: 20px; margin: 14px 0; }
+  .new-visit-btn {
+    margin-top: 20px;
+    background: var(--sky-card);
+    border: 1.5px solid var(--sky-border);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--sky-border); margin: 16px 0; }
+
+  /* ── CHIP TAGS ── */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px;
+    border: 1.5px solid var(--sky-border);
+    font-size: 13px; cursor: pointer;
+    transition: all 0.15s;
+    background: var(--sky-mid);
+    color: var(--muted);
+  }
+  .chip.selected { border-color: var(--clean); background: rgba(0,212,170,0.1); color: var(--clean); }
+
+  .upi-input-wrap { display: none; margin-top: 10px; }
+  .upi-input-wrap.show { display: block; }
+
+  /* Scrollable content padding */
+  main { padding-bottom: 20px; }
+
+  /* ── ACTION BUTTONS (success screen) ── */
+  .action-btn {
+    width: 100%; padding: 15px 20px;
+    border-radius: 14px; border: none; cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    letter-spacing: 0.4px;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .btn-pdf {
+    background: linear-gradient(135deg, #E8860A, #F5A623);
+    color: #0A1628;
+    box-shadow: 0 4px 18px rgba(245,166,35,0.4);
+  }
+  .btn-whatsapp {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white;
+    box-shadow: 0 4px 18px rgba(37,211,102,0.35);
+  }
+  .btn-pdfwa {
+    background: var(--sky-card);
+    border: 1.5px solid var(--sky-border);
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-icon">☀️</div>
+    <div>
+      <div class="header-title">SolarWash Pro</div>
+      <div class="header-sub">EMPLOYEE VISIT FORM</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="steps-row">
+      <div class="step-pill active" id="pill1"></div>
+      <div class="step-pill" id="pill2"></div>
+      <div class="step-pill" id="pill3"></div>
+      <div class="step-pill" id="pill4"></div>
+    </div>
+    <div class="step-label">Step <span id="stepNumLabel">1</span> of 4 — <span id="stepNameLabel">Customer Details</span></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ══ STEP 1: Customer Details ══ -->
+<div class="card active" id="step1">
+  <div class="section-head">
+    <div class="section-icon icon-orange">👤</div>
+    <div>
+      <div class="section-num">STEP 1</div>
+      <div class="section-title">Customer Details</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Full Name *</label>
+    <input type="text" id="custName" placeholder="Enter customer name" autocomplete="off">
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>Mobile Number *</label>
+      <input type="tel" id="custMobile" placeholder="+91 XXXXX XXXXX" maxlength="15">
+    </div>
+    <div class="field">
+      <label>Alternate Number</label>
+      <input type="tel" id="custAlt" placeholder="Optional">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Email Address</label>
+    <input type="email" id="custEmail" placeholder="customer@email.com">
+  </div>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label>Street Address *</label>
+    <input type="text" id="custAddr" placeholder="House/Flat No., Street, Area">
+  </div>
+
+  <div class="row2">
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="custCity" placeholder="City">
+    </div>
+    <div class="field">
+      <label>Pincode</label>
+      <input type="text" id="custPin" placeholder="000000" maxlength="6">
+    </div>
+  </div>
+
+  <div class="field">
+    <label>GPS Location</label>
+    <button class="gps-btn" onclick="getGPS()">
+      <span>📍</span> Capture GPS Location
+    </button>
+    <div class="gps-status" id="gpsStatus">Tap to capture your current location</div>
+    <input type="hidden" id="gpsLat">
+    <input type="hidden" id="gpsLng">
+  </div>
+</div>
+
+
+<!-- ══ STEP 2: Solar Panel & Payment ══ -->
+<div class="card" id="step2">
+  <div class="section-head">
+    <div class="section-icon icon-blue">🔆</div>
+    <div>
+      <div class="section-num">STEP 2</div>
+      <div class="section-title">Panel Details & Payment</div>
+    </div>
+  </div>
+
+  <div class="row3">
+    <div class="field">
+      <label>No. of Panels *</label>
+      <input type="number" id="panelCount" placeholder="0" min="1" oninput="calcAmount()">
+    </div>
+    <div class="field">
+      <label>System kWh</label>
+      <input type="number" id="panelKwh" placeholder="kW" min="0" step="0.1">
+    </div>
+    <div class="field">
+      <label>Rate / Panel (₹)</label>
+      <input type="number" id="ratePerPanel" placeholder="₹" min="0" oninput="calcAmount()">
+    </div>
+  </div>
+
+  <div class="amount-display">
+    <div>
+      <div class="amount-lbl">TOTAL AMOUNT</div>
+      <div class="amount-val" id="totalAmount">₹ 0</div>
+    </div>
+    <div style="font-size:28px">💰</div>
+  </div>
+
+  <div class="field">
+    <label>Service Date</label>
+    <input type="date" id="serviceDate">
+  </div>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label>Payment Method *</label>
+    <div class="pay-opts">
+      <div class="pay-opt" id="payUPI" onclick="selectPay('upi')">
+        <span class="pay-icon">📱</span>
+        UPI Payment
+      </div>
+      <div class="pay-opt" id="payCash" onclick="selectPay('cash')">
+        <span class="pay-icon">💵</span>
+        Cash
+      </div>
+    </div>
+
+    <!-- UPI sub-options -->
+    <div class="upi-input-wrap" id="upiWrap">
+      <label>UPI ID / Number</label>
+      <input type="text" id="upiId" placeholder="yourname@upi or mobile number">
+
+      <label style="margin-top:12px">QR Code for Payment</label>
+      <div class="qr-box show" id="qrBox">
+        <canvas id="qrCanvas" width="140" height="140"></canvas>
+        <div class="qr-label" id="qrLabel">Enter UPI ID above to generate QR</div>
+        <label style="color:#333; font-size:12px; cursor:pointer; margin-top:4px;">
+          📷 Upload custom QR image
+          <input type="file" accept="image/*" style="display:none" onchange="uploadQR(event)">
+        </label>
+      </div>
+    </div>
+
+    <div id="cashNote" style="display:none; color:var(--muted); font-size:13px; margin-top:8px; padding:10px; background:rgba(0,212,170,0.07); border-radius:10px;">
+      💵 Mark as Cash — no additional details needed.
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Payment Status</label>
+    <select id="payStatus">
+      <option value="">Select status</option>
+      <option value="paid">✅ Paid</option>
+      <option value="partial">⏳ Partial</option>
+      <option value="pending">🔴 Pending</option>
+    </select>
+  </div>
+</div>
+
+
+<!-- ══ STEP 3: Photos ══ -->
+<div class="card" id="step3">
+  <div class="section-head">
+    <div class="section-icon icon-purple">📸</div>
+    <div>
+      <div class="section-num">STEP 3</div>
+      <div class="section-title">Before & After Photos</div>
+    </div>
+  </div>
+
+  <div class="photo-grid">
+    <div class="photo-slot" id="beforeSlot">
+      <span class="ph-icon">🔴</span>
+      <span class="ph-label">Before Washing</span>
+      <span class="photo-badge before-badge">BEFORE</span>
+      <input type="file" accept="image/*" capture="environment" onchange="previewPhoto(event,'beforeSlot','beforePreview')">
+      <img id="beforePreview" src="" alt="" style="display:none">
+    </div>
+    <div class="photo-slot" id="afterSlot">
+      <span class="ph-icon">✅</span>
+      <span class="ph-label">After Washing</span>
+      <span class="photo-badge after-badge">AFTER</span>
+      <input type="file" accept="image/*" capture="environment" onchange="previewPhoto(event,'afterSlot','afterPreview')">
+      <img id="afterPreview" src="" alt="" style="display:none">
+    </div>
+  </div>
+
+  <p style="font-size:12px; color:var(--muted); text-align:center; margin-top:10px;">Take photos directly from camera or upload from gallery</p>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label>Additional Site Photos (optional)</label>
+    <div class="photo-grid">
+      <div class="photo-slot" id="extraSlot1">
+        <span class="ph-icon">➕</span>
+        <span class="ph-label">Extra Photo 1</span>
+        <input type="file" accept="image/*" onchange="previewPhoto(event,'extraSlot1','extra1Prev')">
+        <img id="extra1Prev" src="" alt="" style="display:none">
+      </div>
+      <div class="photo-slot" id="extraSlot2">
+        <span class="ph-icon">➕</span>
+        <span class="ph-label">Extra Photo 2</span>
+        <input type="file" accept="image/*" onchange="previewPhoto(event,'extraSlot2','extra2Prev')">
+        <img id="extra2Prev" src="" alt="" style="display:none">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ STEP 4: Remarks & Signature ══ -->
+<div class="card" id="step4">
+  <div class="section-head">
+    <div class="section-icon icon-green">✍️</div>
+    <div>
+      <div class="section-num">STEP 4</div>
+      <div class="section-title">Remarks & Signature</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Customer Satisfaction</label>
+    <div class="star-row" id="starRow">
+      <span class="star" data-v="1" onclick="rateStar(1)">★</span>
+      <span class="star" data-v="2" onclick="rateStar(2)">★</span>
+      <span class="star" data-v="3" onclick="rateStar(3)">★</span>
+      <span class="star" data-v="4" onclick="rateStar(4)">★</span>
+      <span class="star" data-v="5" onclick="rateStar(5)">★</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Panel Condition (select all that apply)</label>
+    <div class="chip-row">
+      <div class="chip" onclick="toggleChip(this)">Dust & Dirt</div>
+      <div class="chip" onclick="toggleChip(this)">Bird Dropping</div>
+      <div class="chip" onclick="toggleChip(this)">Moss/Algae</div>
+      <div class="chip" onclick="toggleChip(this)">Scratches</div>
+      <div class="chip" onclick="toggleChip(this)">Damaged Cell</div>
+      <div class="chip" onclick="toggleChip(this)">Good Condition</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Customer Remarks</label>
+    <textarea id="custRemarks" placeholder="Customer's feedback, special notes…"></textarea>
+  </div>
+
+  <div class="field">
+    <label>Engineer / Technician Notes</label>
+    <textarea id="techNotes" placeholder="Observations, issues found, follow-up needed…" style="min-height:70px;"></textarea>
+  </div>
+
+  <div class="field">
+    <label>Next Service Due</label>
+    <select id="nextService">
+      <option value="">Not scheduled</option>
+      <option value="1month">1 Month</option>
+      <option value="3month">3 Months</option>
+      <option value="6month">6 Months</option>
+      <option value="1year">1 Year</option>
+    </select>
+  </div>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label>Customer Signature *</label>
+    <div class="sig-wrap">
+      <canvas id="sigCanvas"></canvas>
+      <button class="sig-clear" onclick="clearSig()">✕ Clear</button>
+    </div>
+    <div class="sig-hint">Ask customer to sign using finger or stylus</div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="successCard">
+  <div class="success-icon">🌟</div>
+  <div class="success-title">Visit Submitted!</div>
+  <div class="success-ref" id="refNum"></div>
+  <div class="success-sub">The visit form has been saved successfully.</div>
+
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:22px; padding: 0 10px;">
+    <button class="action-btn btn-pdf" onclick="generatePDF()">
+      <span>📄</span> Download PDF Report
+    </button>
+    <button class="action-btn btn-whatsapp" onclick="shareWhatsApp()">
+      <span>💬</span> Share on WhatsApp
+    </button>
+    <button class="action-btn btn-pdfwa" onclick="generateAndSharePDF()">
+      <span>📤</span> Generate PDF &amp; Share
+    </button>
+  </div>
+
+  <div id="pdfProgress" style="display:none; margin-top:14px; color:var(--clean); font-size:13px;">
+    ⏳ Generating PDF...
+  </div>
+
+  <button class="new-visit-btn" onclick="resetForm()" style="margin-top:24px;">+ Start New Visit</button>
+</div>
+
+</main>
+
+<!-- NAV BAR -->
+<div class="nav-bar" id="navBar">
+  <button class="btn btn-back" id="backBtn" onclick="goBack()" style="display:none">← Back</button>
+  <button class="btn btn-next" id="nextBtn" onclick="goNext()">Next →</button>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+const stepNames = ['Customer Details','Panel & Payment','Before & After Photos','Remarks & Signature'];
+let rating = 0;
+let payMethod = '';
+let sigCanvas, sigCtx, isDrawing = false;
+
+// ── INIT ──
+window.onload = () => {
+  // Set today's date
+  document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+  initSignature();
+};
+
+// ── STEP NAV ──
+function updateUI() {
+  document.querySelectorAll('.card').forEach((c,i) => {
+    c.classList.toggle('active', i+1 === currentStep);
+  });
+  for(let i=1;i<=4;i++){
+    const p = document.getElementById('pill'+i);
+    p.className = 'step-pill';
+    if(i < currentStep) p.classList.add('done');
+    else if(i === currentStep) p.classList.add('active');
+  }
+  document.getElementById('stepNumLabel').textContent = currentStep;
+  document.getElementById('stepNameLabel').textContent = stepNames[currentStep-1];
+  document.getElementById('backBtn').style.display = currentStep > 1 ? 'block' : 'none';
+  const nb = document.getElementById('nextBtn');
+  nb.textContent = currentStep === totalSteps ? '✓ Submit' : 'Next →';
+  nb.className = 'btn ' + (currentStep === totalSteps ? 'btn-submit' : 'btn-next');
+  document.getElementById('navBar').style.display = 'flex';
+}
+
+function goNext() {
+  if(!validateStep()) return;
+  if(currentStep < totalSteps) {
+    currentStep++;
+    updateUI();
+    window.scrollTo(0,0);
+  } else {
+    submitForm();
+  }
+}
+
+function goBack() {
+  if(currentStep > 1) { currentStep--; updateUI(); window.scrollTo(0,0); }
+}
+
+// ── VALIDATION ──
+function validateStep() {
+  if(currentStep === 1) {
+    const name = document.getElementById('custName').value.trim();
+    const mob = document.getElementById('custMobile').value.trim();
+    const addr = document.getElementById('custAddr').value.trim();
+    if(!name) return alert('⚠️ Please enter customer name.'), false;
+    if(!mob || mob.length < 10) return alert('⚠️ Please enter a valid mobile number.'), false;
+    if(!addr) return alert('⚠️ Please enter the address.'), false;
+  }
+  if(currentStep === 2) {
+    const panels = document.getElementById('panelCount').value;
+    if(!panels || panels < 1) return alert('⚠️ Please enter number of panels.'), false;
+    if(!payMethod) return alert('⚠️ Please select a payment method.'), false;
+  }
+  if(currentStep === 4) {
+    if(isBlankSignature()) return alert('⚠️ Please get customer signature before submitting.'), false;
+  }
+  return true;
+}
+
+// ── GPS ──
+function getGPS() {
+  const status = document.getElementById('gpsStatus');
+  status.textContent = '⏳ Getting location…';
+  if(!navigator.geolocation) { status.textContent = '❌ GPS not supported'; return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude.toFixed(6);
+    const lng = pos.coords.longitude.toFixed(6);
+    document.getElementById('gpsLat').value = lat;
+    document.getElementById('gpsLng').value = lng;
+    status.innerHTML = `✅ <b style="color:var(--clean)">${lat}, ${lng}</b> — Location captured`;
+  }, err => {
+    status.textContent = '❌ Could not get location. Please check permissions.';
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+// ── CALC AMOUNT ──
+function calcAmount() {
+  const p = parseFloat(document.getElementById('panelCount').value) || 0;
+  const r = parseFloat(document.getElementById('ratePerPanel').value) || 0;
+  document.getElementById('totalAmount').textContent = '₹ ' + (p * r).toLocaleString('en-IN');
+}
+
+// ── PAYMENT ──
+function selectPay(method) {
+  payMethod = method;
+  document.getElementById('payUPI').classList.toggle('selected', method==='upi');
+  document.getElementById('payCash').classList.toggle('selected', method==='cash');
+  document.getElementById('upiWrap').classList.toggle('show', method==='upi');
+  document.getElementById('cashNote').style.display = method==='cash' ? 'block' : 'none';
+}
+
+function uploadQR(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const canvas = document.getElementById('qrCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, 140, 140);
+    img.src = ev.target.result;
+    document.getElementById('qrLabel').textContent = 'Custom QR uploaded';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── PHOTO PREVIEW ──
+function previewPhoto(event, slotId, prevId) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById(prevId);
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    const slot = document.getElementById(slotId);
+    slot.querySelector('.ph-icon') && (slot.querySelector('.ph-icon').style.display='none');
+    slot.querySelector('.ph-label') && (slot.querySelector('.ph-label').style.display='none');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── STARS ──
+function rateStar(n) {
+  rating = n;
+  document.querySelectorAll('.star').forEach((s,i) => {
+    s.classList.toggle('lit', i < n);
+  });
+}
+
+// ── CHIPS ──
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+// ── SIGNATURE ──
+function initSignature() {
+  sigCanvas = document.getElementById('sigCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCanvas.width = (sigCanvas.offsetWidth || 300) * dpr;
+  sigCanvas.height = 160 * dpr;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.scale(dpr, dpr);
+  sigCtx.strokeStyle = '#0A1628';
+  sigCtx.lineWidth = 2.5;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+
+  const getPos = (e) => {
+    const r = sigCanvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+
+  sigCanvas.addEventListener('mousedown', e => { isDrawing=true; const p=getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); });
+  sigCanvas.addEventListener('mousemove', e => { if(!isDrawing) return; const p=getPos(e); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); });
+  sigCanvas.addEventListener('mouseup', () => isDrawing=false);
+  sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing=true; const p=getPos(e); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); }, {passive:false});
+  sigCanvas.addEventListener('touchmove', e => { e.preventDefault(); if(!isDrawing) return; const p=getPos(e); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); }, {passive:false});
+  sigCanvas.addEventListener('touchend', () => isDrawing=false);
+}
+
+function clearSig() {
+  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+}
+
+function isBlankSignature() {
+  const px = sigCtx.getImageData(0,0,sigCanvas.width,sigCanvas.height).data;
+  return !px.some((v,i) => i%4===3 && v>0);
+}
+
+// ── SUBMIT ──
+let currentRef = '';
+function submitForm() {
+  currentRef = 'SW-' + Date.now().toString().slice(-6);
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById('navBar').style.display = 'none';
+  const sc = document.getElementById('successCard');
+  sc.style.display = 'block';
+  document.getElementById('refNum').textContent = 'Ref: ' + currentRef;
+  window.scrollTo(0,0);
+}
+
+// ── COLLECT ALL FORM DATA ──
+function collectData() {
+  const chips = [...document.querySelectorAll('.chip.selected')].map(c=>c.textContent).join(', ');
+  const stars = rating > 0 ? '★'.repeat(rating) + '☆'.repeat(5-rating) : 'Not rated';
+  const payStr = payMethod === 'upi'
+    ? 'UPI — ' + (document.getElementById('upiId').value || 'N/A')
+    : payMethod === 'cash' ? 'Cash' : 'Not specified';
+  const payStatusEl = document.getElementById('payStatus');
+  const payStatusText = payStatusEl.options[payStatusEl.selectedIndex].text || '';
+  const nextSvcEl = document.getElementById('nextService');
+  const nextSvcText = nextSvcEl.options[nextSvcEl.selectedIndex].text || 'Not scheduled';
+  const lat = document.getElementById('gpsLat').value;
+  const lng = document.getElementById('gpsLng').value;
+  const gpsStr = lat && lng ? lat + ', ' + lng : 'Not captured';
+
+  return {
+    ref: currentRef,
+    date: document.getElementById('serviceDate').value || new Date().toLocaleDateString('en-IN'),
+    // Customer
+    name: document.getElementById('custName').value || '-',
+    mobile: document.getElementById('custMobile').value || '-',
+    altMobile: document.getElementById('custAlt').value || '-',
+    email: document.getElementById('custEmail').value || '-',
+    address: document.getElementById('custAddr').value || '-',
+    city: document.getElementById('custCity').value || '-',
+    pincode: document.getElementById('custPin').value || '-',
+    gps: gpsStr,
+    // Panel
+    panels: document.getElementById('panelCount').value || '0',
+    kwh: document.getElementById('panelKwh').value || '-',
+    rate: document.getElementById('ratePerPanel').value || '0',
+    total: document.getElementById('totalAmount').textContent || '₹ 0',
+    payment: payStr,
+    payStatus: payStatusText,
+    // Remarks
+    rating: stars,
+    condition: chips || 'None selected',
+    custRemarks: document.getElementById('custRemarks').value || '-',
+    techNotes: document.getElementById('techNotes').value || '-',
+    nextService: nextSvcText,
+  };
+}
+
+// ── GENERATE PDF ──
+async function generatePDF() {
+  document.getElementById('pdfProgress').style.display = 'block';
+  await new Promise(r => setTimeout(r, 50));
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const d = collectData();
+    const pageW = 210, pageH = 297;
+    const margin = 14;
+    const colW = pageW - margin * 2;
+    let y = 0;
+
+    // ── HEADER ──
+    doc.setFillColor(10, 22, 40);
+    doc.rect(0, 0, pageW, 38, 'F');
+    doc.setFillColor(245, 166, 35);
+    doc.rect(0, 0, 5, 38, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(245, 166, 35);
+    doc.text('SolarWash Pro', margin + 4, 14);
+
+    doc.setFontSize(9);
+    doc.setTextColor(122, 156, 196);
+    doc.text('SOLAR PANEL CLEANING SERVICE REPORT', margin + 4, 21);
+
+    doc.setTextColor(238, 244, 255);
+    doc.setFontSize(8);
+    doc.text('Ref: ' + d.ref, margin + 4, 28);
+    doc.text('Date: ' + d.date, margin + 4, 33);
+
+    // right side ref box
+    doc.setFillColor(30, 58, 106);
+    doc.roundedRect(pageW - margin - 42, 6, 42, 26, 3, 3, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(122, 156, 196);
+    doc.text('VISIT ID', pageW - margin - 22, 13, { align: 'center' });
+    doc.setFontSize(11);
+    doc.setTextColor(245, 166, 35);
+    doc.text(d.ref, pageW - margin - 22, 22, { align: 'center' });
+    doc.setFontSize(7);
+    doc.setTextColor(0, 212, 170);
+    doc.text('VERIFIED', pageW - margin - 22, 28, { align: 'center' });
+
+    y = 46;
+
+    // ── SECTION HELPER ──
+    function sectionHeader(title, emoji) {
+      if(y > pageH - 50) { doc.addPage(); y = 14; }
+      doc.setFillColor(19, 40, 80);
+      doc.rect(margin, y, colW, 9, 'F');
+      doc.setFillColor(245, 166, 35);
+      doc.rect(margin, y, 3, 9, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(238, 244, 255);
+      doc.text(emoji + '  ' + title, margin + 6, y + 6.2);
+      y += 13;
+    }
+
+    function row(label, value, highlight) {
+      if(y > pageH - 20) { doc.addPage(); y = 14; }
+      doc.setFillColor(highlight ? 255 : 240, highlight ? 247 : 244, highlight ? 255 : 250);
+      doc.rect(margin, y, colW, 7, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 120, 150);
+      doc.text(label, margin + 3, y + 5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(20, 30, 50);
+      const valX = margin + 58;
+      const maxValW = colW - 58 - 3;
+      const lines = doc.splitTextToSize(String(value), maxValW);
+      doc.text(lines, valX, y + 5);
+      const rowH = Math.max(7, lines.length * 5);
+      y += rowH + 1;
+    }
+
+    function dividerRow() {
+      doc.setDrawColor(220, 228, 240);
+      doc.line(margin, y, margin + colW, y);
+      y += 3;
+    }
+
+    // ── 1. CUSTOMER DETAILS ──
+    sectionHeader('CUSTOMER DETAILS', '1.');
+    row('Full Name', d.name, true);
+    row('Mobile Number', d.mobile);
+    row('Alternate Number', d.altMobile, true);
+    row('Email', d.email);
+    row('Address', d.address, true);
+    row('City', d.city);
+    row('Pincode', d.pincode, true);
+    row('GPS Location', d.gps);
+    y += 4;
+
+    // ── 2. SOLAR PANEL DETAILS ──
+    sectionHeader('SOLAR PANEL DETAILS', '2.');
+    row('Number of Panels', d.panels, true);
+    row('System Capacity (kWh)', d.kwh);
+    row('Rate per Panel', d.rate ? 'Rs. ' + d.rate : '-', true);
+
+    // Total amount highlight box
+    if(y > pageH - 30) { doc.addPage(); y = 14; }
+    doc.setFillColor(245, 166, 35);
+    doc.roundedRect(margin, y, colW, 12, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(10, 22, 40);
+    doc.text('TOTAL AMOUNT:  ' + d.total, margin + colW/2, y + 8.5, { align: 'center' });
+    y += 16;
+
+    row('Payment Method', d.payment, true);
+    row('Payment Status', d.payStatus);
+    row('Service Date', d.date, true);
+    y += 4;
+
+    // ── 3. PANEL PHOTOS ──
+    sectionHeader('BEFORE & AFTER PHOTOS', '3.');
+
+    const beforeImg = document.getElementById('beforePreview');
+    const afterImg  = document.getElementById('afterPreview');
+    const extra1Img = document.getElementById('extra1Prev');
+    const extra2Img = document.getElementById('extra2Prev');
+
+    function addPhoto(imgEl, label, px, photoY, w, h) {
+      doc.setFillColor(230, 238, 250);
+      doc.roundedRect(px, photoY, w, h + 8, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(60, 80, 120);
+      doc.text(label, px + w/2, photoY + 5, { align: 'center' });
+      if(imgEl && imgEl.src && imgEl.style.display !== 'none' && imgEl.src !== window.location.href) {
+        try {
+          const ext = imgEl.src.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+          doc.addImage(imgEl.src, ext, px + 2, photoY + 7, w - 4, h - 2);
+        } catch(e) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(150, 170, 200);
+          doc.text('Photo not available', px + w/2, photoY + h/2 + 7, { align: 'center' });
+        }
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(150, 170, 200);
+        doc.text('No photo uploaded', px + w/2, photoY + h/2 + 7, { align: 'center' });
+      }
+    }
+
+    if(y > pageH - 70) { doc.addPage(); y = 14; }
+    const photoW = (colW - 6) / 2;
+    const photoH = 55;
+    addPhoto(beforeImg, 'BEFORE WASHING', margin, y, photoW, photoH);
+    addPhoto(afterImg,  'AFTER WASHING',  margin + photoW + 6, y, photoW, photoH);
+    y += photoH + 12;
+
+    if((extra1Img && extra1Img.src && extra1Img.style.display !== 'none') ||
+       (extra2Img && extra2Img.src && extra2Img.style.display !== 'none')) {
+      if(y > pageH - 70) { doc.addPage(); y = 14; }
+      addPhoto(extra1Img, 'EXTRA PHOTO 1', margin, y, photoW, photoH);
+      addPhoto(extra2Img, 'EXTRA PHOTO 2', margin + photoW + 6, y, photoW, photoH);
+      y += photoH + 12;
+    }
+
+    // ── 4. REMARKS & SIGNATURE ──
+    sectionHeader('CUSTOMER REMARKS & SIGN-OFF', '4.');
+    row('Satisfaction Rating', d.rating, true);
+    row('Panel Condition', d.condition);
+    row('Customer Remarks', d.custRemarks, true);
+    row('Technician Notes', d.techNotes);
+    row('Next Service Due', d.nextService, true);
+    y += 4;
+
+    // Signature
+    if(y > pageH - 50) { doc.addPage(); y = 14; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 120, 150);
+    doc.text('CUSTOMER SIGNATURE', margin, y);
+    y += 3;
+
+    const sigData = sigCanvas.toDataURL('image/png');
+    const sigEmpty = isBlankSignature();
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(200, 215, 235);
+    doc.rect(margin, y, colW, 36, 'FD');
+
+    if(!sigEmpty) {
+      try { doc.addImage(sigData, 'PNG', margin + 2, y + 2, colW - 4, 32); }
+      catch(e) { /* skip */ }
+    } else {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(180, 195, 215);
+      doc.text('No signature captured', margin + colW/2, y + 20, { align: 'center' });
+    }
+    y += 40;
+
+    // ── FOOTER ──
+    const totalPages = doc.internal.getNumberOfPages();
+    for(let pg = 1; pg <= totalPages; pg++) {
+      doc.setPage(pg);
+      doc.setFillColor(10, 22, 40);
+      doc.rect(0, pageH - 10, pageW, 10, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(122, 156, 196);
+      doc.text('SolarWash Pro  |  ' + d.ref + '  |  ' + d.date, margin, pageH - 4);
+      doc.text('Page ' + pg + ' of ' + totalPages, pageW - margin, pageH - 4, { align: 'right' });
+    }
+
+    // Save
+    const fileName = 'SolarWash_' + d.name.replace(/\s+/g,'_') + '_' + d.ref + '.pdf';
+    doc.save(fileName);
+    document.getElementById('pdfProgress').textContent = '✅ PDF downloaded!';
+    setTimeout(() => document.getElementById('pdfProgress').style.display = 'none', 3000);
+    return { doc, fileName, d };
+  } catch(err) {
+    document.getElementById('pdfProgress').textContent = '❌ Error: ' + err.message;
+    console.error(err);
+  }
+}
+
+// ── WHATSAPP SHARE (text summary) ──
+function shareWhatsApp() {
+  const d = collectData();
+  const msg =
+`☀️ *SolarWash Pro — Service Report*
+📋 Ref: ${d.ref}
+📅 Date: ${d.date}
+
+*👤 Customer*
+Name: ${d.name}
+Mobile: ${d.mobile}
+Address: ${d.address}, ${d.city} - ${d.pincode}
+
+*🔆 Panel Details*
+Panels: ${d.panels}
+Capacity: ${d.kwh} kWh
+Total Amount: ${d.total}
+Payment: ${d.payment} (${d.payStatus})
+
+*📝 Remarks*
+Rating: ${d.rating}
+Customer: ${d.custRemarks}
+Next Service: ${d.nextService}
+
+_Generated by SolarWash Pro Employee App_`;
+
+  const encoded = encodeURIComponent(msg);
+  window.open('https://wa.me/?text=' + encoded, '_blank');
+}
+
+// ── GENERATE PDF THEN OPEN WHATSAPP ──
+async function generateAndSharePDF() {
+  document.getElementById('pdfProgress').style.display = 'block';
+  document.getElementById('pdfProgress').textContent = '⏳ Generating PDF...';
+  const result = await generatePDF();
+  if(result) {
+    setTimeout(() => {
+      document.getElementById('pdfProgress').textContent = '✅ PDF saved! Opening WhatsApp...';
+      setTimeout(() => shareWhatsApp(), 800);
+    }, 500);
+  }
+}
+
+function resetForm() {
+  currentStep = 1;
+  document.getElementById('successCard').style.display = 'none';
+  document.getElementById('navBar').style.display = 'flex';
+  document.querySelectorAll('input[type=text], input[type=tel], input[type=email], input[type=number], textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.chip.selected').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('lit'));
+  document.querySelectorAll('.photo-slot img').forEach(img=>{img.style.display='none'; img.src='';});
+  document.querySelectorAll('.photo-slot .ph-icon, .photo-slot .ph-label').forEach(el=>el.style.display='');
+  clearSig();
+  payMethod='';
+  rating=0;
+  document.getElementById('payUPI').classList.remove('selected');
+  document.getElementById('payCash').classList.remove('selected');
+  document.getElementById('upiWrap').classList.remove('show');
+  document.getElementById('cashNote').style.display='none';
+  document.getElementById('totalAmount').textContent='₹ 0';
+  document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('gpsStatus').textContent='Tap to capture your current location';
+  updateUI();
+}
+
+updateUI();
+</script>
+</body>
+</html>
